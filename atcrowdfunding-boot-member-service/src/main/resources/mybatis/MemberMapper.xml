@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.atcrowdfunding.member.dao.MemberMapper" >
+  <resultMap id="BaseResultMap" type="com.atguigu.atcrowdfunding.bean.Member" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="loginacct" property="loginacct" jdbcType="VARCHAR" />
+    <result column="userpswd" property="userpswd" jdbcType="CHAR" />
+    <result column="username" property="username" jdbcType="VARCHAR" />
+    <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="authstatus" property="authstatus" jdbcType="CHAR" />
+    <result column="usertype" property="usertype" jdbcType="CHAR" />
+    <result column="realname" property="realname" jdbcType="VARCHAR" />
+    <result column="cardnum" property="cardnum" jdbcType="VARCHAR" />
+    <result column="accttype" property="accttype" jdbcType="CHAR" />
+    <result column="telphone" property="telphone" jdbcType="CHAR" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_member
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.atguigu.atcrowdfunding.bean.Member" >
+    insert into t_member (id, loginacct, userpswd, 
+      username, email, authstatus, 
+      usertype, realname, cardnum, 
+      accttype)
+    values (#{id,jdbcType=INTEGER}, #{loginacct,jdbcType=VARCHAR}, #{userpswd,jdbcType=CHAR}, 
+      #{username,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{authstatus,jdbcType=CHAR}, 
+      #{usertype,jdbcType=CHAR}, #{realname,jdbcType=VARCHAR}, #{cardnum,jdbcType=VARCHAR}, 
+      #{accttype,jdbcType=CHAR})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.atguigu.atcrowdfunding.bean.Member" >
+    update t_member
+    set loginacct = #{loginacct,jdbcType=VARCHAR},
+      userpswd = #{userpswd,jdbcType=CHAR},
+      username = #{username,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR},
+      authstatus = #{authstatus,jdbcType=CHAR},
+      usertype = #{usertype,jdbcType=CHAR},
+      realname = #{realname,jdbcType=VARCHAR},
+      cardnum = #{cardnum,jdbcType=VARCHAR},
+      accttype = #{accttype,jdbcType=CHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select id, loginacct, userpswd, username, email, authstatus, usertype, realname, 
+    cardnum, accttype,telphone
+    from t_member
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, loginacct, userpswd, username, email, authstatus, usertype, realname, 
+    cardnum, accttype
+    from t_member
+  </select>
+  
+  <select id="queryMemberByLoginacct" resultMap="BaseResultMap">
+  	 select id, loginacct, userpswd, username, email, authstatus, usertype, realname, 
+    cardnum, accttype
+    from t_member
+    where loginacct =#{loginacct} 
+  
+  </select>
+  <select id="queryTicketByMemberId" resultType="com.atguigu.atcrowdfunding.bean.Ticket">
+  	select id,memberid, piid,status,authcode,pstep 
+  	from t_ticket 
+  	where memberid=#{id}
+  	
+  </select>
+  <insert id="saveTicket">
+  	insert into t_ticket(memberid,piid,status,pstep) values(#{memberid},#{piid},#{status},#{pstep})
+  </insert>
+  <update id="updateMember">
+  	update t_member set accttype = #{accttype} where id=#{id}
+  </update>
+  <update id="updateTicket">
+  	update t_ticket set pstep=#{pstep} where piid=#{piid}
+  </update>
+  <update id="updateLoginMember">
+  	update t_member set realname=#{realname},
+  	cardnum=#{cardnum},
+  	telphone=#{telphone}
+  	where id =#{id}
+  </update>
+  <select id="queryCertByAccttype" resultType="com.atguigu.atcrowdfunding.bean.Cert">
+  	SELECT t_cert.* FROM t_cert LEFT JOIN t_account_type_cert ON 
+	t_cert.`id`=t_account_type_cert.`certid`
+	WHERE t_account_type_cert.`accttype`=#{accttype}
+  	
+  </select>
+  <insert id="saveMemberCertList">
+  	insert into t_member_cert (memberid,certid,iconpath) values
+  	<foreach collection="list" item="cert" separator=",">
+  		(#{cert.memberid},#{cert.certid},#{cert.iconpath})
+  	</foreach>
+  
+  </insert>
+  <select id="queryMemberById" resultMap="BaseResultMap">
+  	select * from t_member where id=#{memberid}
+  
+  </select>
+  <update id="updateMemberByEmail">
+  	update t_member set email=#{email} where id=#{id}
+  </update>
+  <update id="updateTicketByAuthcodeAndPstep">
+  		update t_ticket set pstep=#{pstep},authcode=#{authcode} where piid=#{piid}
+  
+  </update>
+  <update id="updateMemberByAuthstatus">
+  		update t_member set authstatus=#{authstatus} where id=#{id} 
+  </update>
+  <select id="queryMemberByPiid" resultMap="BaseResultMap">
+  	SELECT * FROM t_member WHERE id=(SELECT memberid FROM t_ticket WHERE piid=#{piid})
+  </select>
+  <select id="queryCertByMemberId" resultType="java.util.Map">
+  SELECT t_cert.name AS certname,t_cert.id AS certid,t_member_cert.iconpath,t_member_cert.memberid
+FROM t_cert,t_member_cert
+WHERE t_cert.id=t_member_cert.certid AND t_member_cert.memberid=#{memberid}
+  
+  </select>
+
+</mapper>
